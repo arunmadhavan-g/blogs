@@ -1,11 +1,11 @@
-We had to, for one of our clients  help them integrate Business process management(BPM) into their existing multi-tenant system. 
+We had to, for one of our clients help them integrate Business process management(BPM) into their existing multi-tenant system, to power approval flows.
 The solution had to 
 
 * Easily import a standard BPMN 2.0 based definition and also let create one as well.
 * Work with multiple tenants and ensure data does not get shared between user of tenants.
-* Open source to keep the cost involved low. 
-* Easy to scale.
-* Customizable to meet their existing platform requirements. 
+* Be Open source to keep the cost involved low. 
+* Scale Easily.
+* Be Customizable to meet their existing platform requirements. 
 
 The rest of the talks about how we managed to accomplish that and the thought process that went into the building of the overall solution. 
 
@@ -56,7 +56,15 @@ It allows the business or the business analyst to draw the BLOCKS of and the con
 
 ![Simple BPMN](./images/transientBPMN/simple-bpmn-flow.png)
 
-// TODO: Talk about types of tasks and control flow
+Some of the types of blocks are
+* **Start Node** that indicates the start of a flow
+* **Task Node** which typically denotes an operation this can be 
+    * **User Task** which needs a user to act upon ( like an approval process ) 
+    * **Service Task** which helps in doing pre-built tasks such as calling an API, performing calculations etc. 
+* **Conditional Node** which performs a conditional operation and determins the next flow 
+* **End Node** that denotes a completion of the flow
+
+The above figure shows these blocks put together to define a order approval workflow.  
 
 # Why Camunda
 
@@ -95,7 +103,7 @@ The user would have their own login and a list of work items they can act upon (
 
 Each process would relate to a specific business process execution.  With this primer in mind, we'll continue to the problem statement. 
 
-# The Requirement - Multi Tenant X Multi Processes
+# The Requirement - (Multi-Tenant X Multi-Processes)
 
 
 # User Management Conundrum
