@@ -26,6 +26,36 @@ This also potentially cleared all the headaches of maintaining the users across 
 
 # BPMN : A quick intro
 
+Let us consider an editorial example that involves the following work flow. 
+
+* An employee writes a piece of article and submits for review
+* The article goes through a review engine, that based on the key words flags for sensitive material
+* Based on the flagging level the article would go to  
+    * Sub Editor in case of a normal one
+    * Senior editor in case it's sensitive
+* The reviewer looked into the article and can 
+    * Approve it if it's good
+    * Send back if there are changes needed
+    * Reject it if it's not worth publishing
+* After the above process the article gets
+    * published and available for others to read if Approved
+    * sent back to the employee who can rework on it and go through the process again
+    * moves to the archive in case of Rejected
+
+Typically we have a flow that can be defined here. A similar parallel can be drawn against many such situations which also works with enterprises and processes such as 
+
+* Leave approval flow ( where it can be an immediate manager who would approve it )
+* Procurement ( where there can be many levels of approval )
+* Travel Requests  ... 
+
+
+Typically the processes are defined by the business and there will be a team who would work on translating it to code. 
+A BPM system acts as a bridge to make things more accessible to both the parties. 
+
+It allows the business or the business analyst to draw the BLOCKS of and the connections between them. This is defined in the background as a XML following a standard called the BPMN2.0 notation.
+
+// TODO: Insert the BPMN simple thing image here. 
+
 
 # Why Camunda
 
