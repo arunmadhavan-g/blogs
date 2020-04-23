@@ -54,13 +54,48 @@ A BPM system acts as a bridge to make things more accessible to both the parties
 
 It allows the business or the business analyst to draw the BLOCKS of and the connections between them. This is defined in the background as a XML following a standard called the BPMN2.0 notation.
 
-// TODO: Insert the BPMN simple thing image here. 
+![Simple BPMN](./images/transientBPMN/simple-bpmn-flow.png)
 
+// TODO: Talk about types of tasks and control flow
 
 # Why Camunda
 
+While assessing multiple BPM solutions, we wanted a tool that is
+* BPMN 2.0 compliant
+* Opensource to keep the cost ( related to licensing ) low. 
+* Easy to deploy and scale
+* Ability to Customize easily for our requirements
+* Decent community support for trouble shooting and upgrades
 
-# Camunda as Spring Application
+We looked into a number of options and liked Camunda the most because it fulfilled most of our needs. 
+It also gave us the ability to wrap it up as a Spring Boot project with custom code handling.
+
+The document was decent ( there were definitely places where we wished it could have been more intutive) and the code organization was easy to understand.
+Most importantly it was build using Java, Spring and uses a RDBMS system in the backend which makes understanding and customizing it easier. 
+
+# Camunda - Process flow
+
+Before we get into solving the actual problem, a small primer on how Camunda works with respect to executing a BPM process. 
+
+* Every BPMN file that we upload is deployed. We'll call this a deployment. This is associated with a "deploymentId"
+* After a BPMN is deployed, it can be started. The equivalent is like deploying an application in a server and it's ready to take requests. 
+* When an activity requires triggering of a business process, we use the "deploymentId" associated with the business process and we trigger a process. The process will be associated with a "processId"
+* The process would typically consist of multiple task, each of which will be identified using a "taskId"
+* Some of these tasks are user tasks.  User tasks will not execute until a user acts on it ( like an approve, reject, send back etc. )
+* On completion of all the tasks, the process will also come to an end, leaving the BPM deployment to be alive. 
+
+
+![Deployment-Process-Task](./images/transientBPMN/deployment-process-tasks.png)
+
+So every BPMN process that we need to execute will have it's own deployment. 
+This deployment can inturn have multiple processes which inturn can have multiple tasks. 
+
+As a special note, while executing user tasks, the user who needs to act on it (or a group of users in some cases), should be a part of Camunda's users to be able to perform the activity on the task. 
+The user would have their own login and a list of work items they can act upon (examples tasks that require approvals).
+
+Each process would relate to a specific business process execution.  With this primer in mind, we'll continue to the problem statement. 
+
+# The Requirement - Multi Tenant X Multi Processes
 
 
 # User Management Conundrum
