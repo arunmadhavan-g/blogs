@@ -105,6 +105,49 @@ Each process would relate to a specific business process execution.  With this p
 
 # The Requirement - (Multi-Tenant X Multi-Processes)
 
+The existing consists of an admin user (admin) and a normal user (user). The user can use the system to raise different kinds of requests.
+Each request would now go to the admin for their approval and following which they get fulfilled.
+
+Our customer wanted this to be changed to use a BPMN based flow to 
+
+* Avoid having single point of failure on the Admin user for all the requests
+* Adopt the system for enterprise usecases where typically depending on the type of the request, it would go through a different set of flow
+
+Basically they wanted the ability to be able ot define different types of approval flow, and attach each types of request with a specific approval flow.
+A few examples to make this more clear
+
+* For a request type which may involve "install Firefox browser" in a user's machine may not need any approvals
+* A request to apply for a duplicate ID card request would need approval from "reporing manager"
+* A request to create an S3 bucket for their project would need approval from  "reporting manager", "architecture team" and "Finance Team"
+
+So in each of the situations we will have a corresponding work flow defined to handle the approval flows.
+Typially this means the user to whom the approval would be assigned to would be determined runtime, based on the requesting user/ type of request. 
+Similarly the same approval may go to an individual (e.g. reporting manager) or to a group of people (e.g. Finance team).  
+In most cases the user details of the tenants were coming from LDAP which means getting the corresponding user / users details at run time would be a query against thei LDAP. 
+
+This means we need to handle the following
+
+1. Have the ability to define different BPM processes in the system ( defined using BPMN )
+2. Associate all the requests types with a corresponding BPM process
+3. On creation of a request, depending on the type use the corresponding BPM process
+4. Depending on the BPM process, have the ability to search for and assign approval to a user / group of users. 
+
+
+It just get's better when these needs to be handled for multiple tenants as well.  Which means we need to bring
+
+* isolation of process acroess tenants
+* isolation of users across different tenants
+* Depending on the tenant, the querying from LDAP will vary and that should be accomodated as a configuration.
+
+# The First Iteration
+
+Solving problems 1 and 2 looked quite straight forward. The BPMN definitions were created as deployments in Camunda. 
+It's deployment ID and process Id were put into a workflow definition table along with meta-information such as name and description.
+We ran a migration against the requestType table to include an extra column holding the workflowId and associate it with the corresponding workflow type. 
+With this we were able to trigger a workflow everytime a request was created. 
+
+
+
 
 # User Management Conundrum
 
