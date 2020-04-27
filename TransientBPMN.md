@@ -122,7 +122,7 @@ A few examples to make this more clear
 
 So in each of the situations we will have a corresponding work flow defined to handle the approval flows.
 Typially this means the user to whom the approval would be assigned to would be determined runtime, based on the requesting user/ type of request. 
-Similarly the same approval may go to an individual (e.g. reporting manager) or to a group of people (e.g. Finance team).  
+Similarly the same approval may go to an individual (e.g. reporting manager) or to a group of people (e.g. Finance team).  We call the former an hierarchial approval as it's based on an hierarchy and the latter a group approval as it's just assigning it to a group. 
 In most cases the user details of the tenants were coming from LDAP which means getting the corresponding user / users details at run time would be a query against thei LDAP. 
 
 This means we need to handle the following
@@ -146,13 +146,42 @@ It's deployment ID and process Id were put into a workflow definition table alon
 We ran a migration against the requestType table to include an extra column holding the workflowId and associate it with the corresponding workflow type. 
 With this we were able to trigger a workflow everytime a request was created. 
 
+This is where our next challenge arose, 
+
+## User Management Conundrum
+
+We had to figure out the following,
+1. Based on the logged in user, find the corresponding person to which the approval needs to be assigned to in case of hierarchial approvals
+2. Based on the user logged in show them the approvals pending their action. 
+
+For this we integrated Camunda into our SSO, wrote scripts to replicate the same set of users into Camunda's database and run them regularly to keep them in sync. We also integrated Camunda with LDAP directly to pull the user details and take care of the assignments (both hierarchial and group). But then came the issue. 
+
+We had to do this for a multi-tenant system, which means we are going to 
+
+1. Bring all the users across individual tenants into Camunda
+2. Keep them synced up ( both creates and deletes )
+3. Ensure isolation between tenants
+4. Handle growing data in the database
+5. Figure out errors/ crashes between systems and eventual data sync up etc. etc. 
+
+This started to bring in a lot of moving parts. On top of this we were trying to re-invent the same things that we had already handled as part of the main application, for example the LDAP searches, tenant level isolation, email notification etc. The amount of work to ensure everything works was starting to build up and the fact that there were too many moving parts and multiple sources of truth could make maintenance a nightmare.  
+
+Camunda does give us the ability to create different tenants which helps with isolation to a large extent, but it was still a concern with all the data sync up and logic duplication.
+
+## Deployment - Overflow
+
+To add to the growing user, sync up issue, we found another one. The number of BPMN deployments grew, and it grew wild. 
+
+Every tenant brought in their own BPMN files, each of which were creating their own deployment and every one of them started showing up in the console. This looked pretty messed up especially and with more tenants expected to be onboard, we were definitely staring at a maintenance nightmare.
+We had to rethink our implementation strategy. 
 
 
+# Keeping it Simple
 
-# User Management Conundrum
+## Transient and Stateless
 
+## Isolation
 
-# Keeping things stateless
 
 
 # Final Solution
