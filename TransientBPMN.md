@@ -173,12 +173,45 @@ Camunda does give us the ability to create different tenants which helps with is
 To add to the growing user, sync up issue, we found another one. The number of BPMN deployments grew, and it grew wild. 
 
 Every tenant brought in their own BPMN files, each of which were creating their own deployment and every one of them started showing up in the console. This looked pretty messed up especially and with more tenants expected to be onboard, we were definitely staring at a maintenance nightmare.
+
 We had to rethink our implementation strategy. 
 
 
 # Keeping it Simple
 
+The first thing that we wanted to address was to reduce the moving parts. To achieve the same we decided to do the following
+
+* Look at a way to maintain a single source of truth. If the data duplication between Camunda and application be avoided then let's do that. 
+
+* Try to leverage the existing functionality in the application instead of replicating the same in Camunda end. For example using the email service, LDAP lookup in the application can be leveraged rather than replicating it every time. 
+
+* Handle multi tenance as part of application and not as part of the camunda. This would again reduce the number of configurations that would have to be done at the camunda end to ensure data isolation. 
+
+* Think of a good way to solve the deployment explosion. 
+
+Basically we wanted to have a system which has minimal of no information with itself and only work with the inputs passed to it.  Basically a dumb system that does only one work. Run workflows.  
+
+## Runtime deployments
+
+To avoid the deployment explosion problem, we decided that anyone who uploads a BPMN file to the system to implement their approval flow, we would not be doing a deployment into Camunda.
+
+Instead we uploaded the files into an S3 bucket and stored it's details into the workflow table. Everytime a request was created which required a specific type of workflow, we leveraged the camunda API that would
+
+* Download the bpmn file from S3.
+* Make an API call to deploy this BPMN definition. This returns the deployment Id.
+* Not follow the previous path of initiating a process for this deployment Id. 
+* Once all the tasks are completed, we made camunda talk back to the application to mark the workflow as complete.
+* This triggers another API call to undeploy the definition. 
+
+This suddenly made all the persistent deployments to disappear from the camunda console. All that we were able to see are those which are in progress. 
+
+This kept things simple and massively reduced the headache of figuring out which deployment is for what.  
+
+//TODO : a sequence diagram of sorts to explain this flow. 
+
 ## Transient and Stateless
+
+s
 
 ## Isolation
 
