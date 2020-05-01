@@ -209,15 +209,54 @@ This kept things simple and massively reduced the headache of figuring out which
 
 //TODO : a sequence diagram of sorts to explain this flow. 
 
-## Transient and Stateless
+## Transient and Statelesss
 
-s
+Now that we solved the issue with the deployment overflow resolved, we wanted to work on the duplication of data part between the systems. We still needed users to act on their tasks which means the user had to be synced.
+
+This is when we explored using the Listeners for the user tasks. By now the complete deployment and kick starting a process was all handled as part of the core applicaiton using camunda APIs.
+We now added a new endpoint in the main application that would
+
+* Take the task Id of the camunda user task
+* The request Id for which the workflow is running
+* The type of approval that needs to happen which can be hierarchial or group in this case.
+
+We wrote custom TaskListeners in the Camunda Spring application and made it trigger this endpoint with the appropriate details on the task "create" lifecycle. 
+
+// TODO a sequence diagram of sorts 
+
+So this would make as call to the base application, where using the already available LDAP search capability, the corresponding user(s) who needs to act on the approval is identified and and entry is made into a table with the userId, the requesting user Id, the task Id from Camunda and request Id. 
+
+This information is presented in pending approval screen which was not in camunda anymore. When the user acts on the same, we trigger the camunda API to update the corresponding task.  To close the loop as part of the "complete" lifecycle, we make another endpoint call that would mark this task as complete in the base application.
+
+This gave us the ability to completely manage the user as part of the base application and eliminated any need for replicating the users. All that we needed was an admin account and a secure password which was used by the application to make the rest api calls. 
+
 
 ## Isolation
 
+The last change eliminated the need to 
+* Configure SSO 
+* Expose Camunda to the end user
+* Have convoluted processes in place to manage the overall application
+* Duplicating a number of functionalities that are already in place in the base application. 
+
+The best part was we did not have to expose camunda to the external world at all as all user interactions with the system is not eliminated. 
+
+So we were able to move it to a VPN that was isolated from the public facing internet. 
+Also the fact that each user approval was a separate deployment, ensured data isolation.
+With all this multi-tenancy and fear of differnet tenant information getting mixed up was also eliminated. 
+
+So we were able to get tenant level, user level, network level and system level isolation making this quite a secure implementation. 
 
 
 # Final Solution
 
+The overall final solution looked like below. 
 
-# Summary
+// TODO : overall solution diagram 
+
+We were able to implement a solution that had no duplication of data with pretty good isolation. This solution also can scale well and with the current implementation, it was also resource frugal. 
+
+
+
+
+
