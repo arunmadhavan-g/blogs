@@ -7,7 +7,7 @@ The solution had to
 * Scale Easily.
 * Be Customizable to meet their existing platform requirements. 
 
-The rest of the talks about how we managed to accomplish that and the thought process that went into the building of the overall solution. 
+The rest of the blog talks about how we managed to accomplish that and the thought process that went into the building of the overall solution. 
 
 # TL;DR
    
@@ -73,13 +73,20 @@ While assessing multiple BPM solutions, we wanted a tool that is
 * Opensource to keep the cost ( related to licensing ) low. 
 * Easy to deploy and scale
 * Ability to Customize easily for our requirements
-* Decent community support for trouble shooting and upgrades
+* Decent community support for troubleshooting and upgrades
 
 We looked into a number of options and liked Camunda the most because it fulfilled most of our needs. 
 It also gave us the ability to wrap it up as a Spring Boot project with custom code handling.
 
 The document was decent ( there were definitely places where we wished it could have been more intutive) and the code organization was easy to understand.
-Most importantly it was build using Java, Spring and uses a RDBMS system in the backend which makes understanding and customizing it easier. 
+Most importantly it was build using Java, Spring and uses a RDBMS system in the backend which makes understanding and customizing it easier.  Camunda comes out of the box with the following components
+* Modeller - an offline application ( also available as JS library through (bpmn.io)[https://bpmn.io/] )  to help build BPMN flows
+* Cockpit - an admin applicaiton that helps monitor and solve technical issues such as monitoring deployments, services etc. 
+* Workflow engine - An engine that handles execution of individual workflows
+* TaskList - An end user facing part of camunda where a user can see the tasks he is assigned to and act on them. 
+
+For full features of Camunda and how it works follow, their (website)[https://camunda.com/products/]  or their (documentation)[https://docs.camunda.org/manual] would be a great place to start. 
+
 
 # Camunda - Process flow
 
@@ -113,7 +120,7 @@ Our customer wanted this to be changed to use a BPMN based flow to
 * Avoid having single point of failure on the Admin user for all the requests
 * Adopt the system for enterprise usecases where typically depending on the type of the request, it would go through a different set of flow
 
-Basically they wanted the ability to be able ot define different types of approval flow, and attach each types of request with a specific approval flow.
+Basically they wanted the ability to be able to define different types of approval flow, and attach each types of request with a specific approval flow.
 A few examples to make this more clear
 
 * For a request type which may involve "install Firefox browser" in a user's machine may not need any approvals
@@ -123,7 +130,7 @@ A few examples to make this more clear
 So in each of the situations we will have a corresponding work flow defined to handle the approval flows.
 Typially this means the user to whom the approval would be assigned to would be determined runtime, based on the requesting user/ type of request. 
 Similarly the same approval may go to an individual (e.g. reporting manager) or to a group of people (e.g. Finance team).  We call the former an hierarchial approval as it's based on an hierarchy and the latter a group approval as it's just assigning it to a group. 
-In most cases the user details of the tenants were coming from LDAP which means getting the corresponding user / users details at run time would be a query against thei LDAP. 
+In most cases the user details of the tenants were coming from LDAP which means getting the corresponding user / users details at run time would be a query against their LDAP. 
 
 This means we need to handle the following
 
@@ -151,6 +158,7 @@ This is where our next challenge arose,
 ## User Management Conundrum
 
 We had to figure out the following,
+
 1. Based on the logged in user, find the corresponding person to which the approval needs to be assigned to in case of hierarchial approvals
 2. Based on the user logged in show them the approvals pending their action. 
 
@@ -172,7 +180,7 @@ Camunda does give us the ability to create different tenants which helps with is
 
 To add to the growing user, sync up issue, we found another one. The number of BPMN deployments grew, and it grew wild. 
 
-Every tenant brought in their own BPMN files, each of which were creating their own deployment and every one of them started showing up in the console. This looked pretty messed up especially and with more tenants expected to be onboard, we were definitely staring at a maintenance nightmare.
+Every tenant brought in their own BPMN files, each of which were creating their own deployment and every one of them started showing up in the camunda console. This looked pretty messed up especially and with more tenants expected to be onboard, we were definitely staring at a maintenance nightmare.
 
 We had to rethink our implementation strategy. 
 
