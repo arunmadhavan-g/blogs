@@ -80,12 +80,12 @@ It also gave us the ability to wrap it up as a Spring Boot project with custom c
 
 The document was decent ( there were definitely places where we wished it could have been more intutive) and the code organization was easy to understand.
 Most importantly it was build using Java, Spring and uses a RDBMS system in the backend which makes understanding and customizing it easier.  Camunda comes out of the box with the following components
-* Modeller - an offline application ( also available as JS library through (bpmn.io)[https://bpmn.io/] )  to help build BPMN flows
+* Modeller - an offline application ( also available as JS library through [bpmn.io](https://bpmn.io/) )  to help build BPMN flows
 * Cockpit - an admin applicaiton that helps monitor and solve technical issues such as monitoring deployments, services etc. 
 * Workflow engine - An engine that handles execution of individual workflows
 * TaskList - An end user facing part of camunda where a user can see the tasks he is assigned to and act on them. 
 
-For full features of Camunda and how it works follow, their (website)[https://camunda.com/products/]  or their (documentation)[https://docs.camunda.org/manual] would be a great place to start. 
+For full features of Camunda and how it works follow, their [website](https://camunda.com/products/)  or their [documentation](https://docs.camunda.org/manual) would be a great place to start. 
 
 
 # Camunda - Process flow
