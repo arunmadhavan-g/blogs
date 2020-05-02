@@ -93,7 +93,7 @@ Before we get into solving the actual problem, a small primer on how Camunda wor
 * On completion of all the tasks, the process will also come to an end, leaving the BPM deployment to be alive. 
 
 
-![Deployment-Process-Task](./images/transientBPMN/deployment-process-tasks.png)
+![Deployment-Process-Task](./images/transientBPMN/Camunda-Block.jpg)
 
 So every BPMN process that we need to execute will have it's own deployment. 
 This deployment can inturn have multiple processes which inturn can have multiple tasks. 
@@ -207,7 +207,7 @@ This suddenly made all the persistent deployments to disappear from the camunda 
 
 This kept things simple and massively reduced the headache of figuring out which deployment is for what.  
 
-//TODO : a sequence diagram of sorts to explain this flow. 
+![Multi Deploy](./images/transientBPMN/MultiDeploy.png)
 
 ## Transient and Statelesss
 
@@ -222,11 +222,11 @@ We now added a new endpoint in the main application that would
 
 We wrote custom TaskListeners in the Camunda Spring application and made it trigger this endpoint with the appropriate details on the task "create" lifecycle. 
 
-// TODO a sequence diagram of sorts 
-
 So this would make as call to the base application, where using the already available LDAP search capability, the corresponding user(s) who needs to act on the approval is identified and and entry is made into a table with the userId, the requesting user Id, the task Id from Camunda and request Id. 
 
 This information is presented in pending approval screen which was not in camunda anymore. When the user acts on the same, we trigger the camunda API to update the corresponding task.  To close the loop as part of the "complete" lifecycle, we make another endpoint call that would mark this task as complete in the base application.
+
+![Transient Flow](./images/transientBPMN/TransientFlow.png)
 
 This gave us the ability to completely manage the user as part of the base application and eliminated any need for replicating the users. All that we needed was an admin account and a secure password which was used by the application to make the rest api calls. 
 
@@ -245,16 +245,17 @@ So we were able to move it to a VPN that was isolated from the public facing int
 Also the fact that each user approval was a separate deployment, ensured data isolation.
 With all this multi-tenancy and fear of differnet tenant information getting mixed up was also eliminated. 
 
+![Isolation](./images/transientBPMN/Isolation.png)
+
 So we were able to get tenant level, user level, network level and system level isolation making this quite a secure implementation. 
 
 
-# Final Solution
+# Summary
 
-The overall final solution looked like below. 
+We were able to move from a high maintenace, tightly coupled system to a more loosely couples system.
 
-// TODO : overall solution diagram 
+In the process we achieved better isolation between tenants and also ensured that the individual systems were capable of scaling easily as well.
 
-We were able to implement a solution that had no duplication of data with pretty good isolation. This solution also can scale well and with the current implementation, it was also resource frugal. 
 
 
 
