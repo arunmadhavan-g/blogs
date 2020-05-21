@@ -88,7 +88,7 @@ corresponding areas.
 
 ### 4. Persona Workshop
 
-_Session For: Product Owner, Technical Team, End Users
+_Session For: Product Owner, Technical Team, End Users_
 
 #### This session helps in
  - Identify different types of users 
@@ -127,7 +127,7 @@ _Session For: Product Owner, Business Owners,Technical Team and End Users_
 
 ### 6. User and Data Journeys
 
-_Session For: Product Owners, Business Owners and Technical Team
+_Session For: Product Owners, Business Owners and Technical Team_
 
 #### This session helps in
 
@@ -146,7 +146,7 @@ _Session For: Product Owners, Business Owners and Technical Team
 
 ### 7. Mapping Journeys to Features
 
-_Session For: Product Owners, Business Owners and Technical Team
+_Session For: Product Owners, Business Owners and Technical Team_
 
 #### This session helps in
 
