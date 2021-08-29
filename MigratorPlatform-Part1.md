@@ -76,6 +76,7 @@ With the above information in hand, let's take a look into how we were able to p
 
 ## Step Executor
 
+Step Executor was a service that exposed a single POST endpoint, to which we can pass a set of input and security information, based on which it would choose and run a terraform script. The endpoint would handle the request in an async fashion and will make a call back to a webhook endpoint exposed at the "Orchestrator Service" ( to be discussed later ) with the output from terraform. 
 
 
 
