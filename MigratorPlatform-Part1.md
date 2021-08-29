@@ -49,7 +49,7 @@ Our overall architecture had the below components
 | Step Executor | The Node and Typescript application that triggers terraform scripts for the actual provisioning of components, based on the inputs passed from Orchestrator | 
 
 
-In this blog post, we'll specifically how we designed and developed the Orchestrator and Step Executor components. 
+In this blog post, we'll specifically how we designed and developed the Step Executor. 
 
 
 ## Provisioning of GCP Components
@@ -312,7 +312,7 @@ EXPOSE 8000
 ENTRYPOINT [ "npm", "run", "start" ]
 ```
 
-This helped us execute the scripts in a self sustained manner. 
+This helped us execute the scripts in a self sustained manner. We pushed this docker imaged into [Google Container Registry](https://cloud.google.com/container-registry)
 
 ### Deploying and Running the Application
 
@@ -325,13 +325,19 @@ The Step Executor is also expected to operate in an async fashion. As mentioned 
 So we explored a way to execute the docker in a serverless fashion. That is when we came across [Google Run](https://cloud.google.com/run) which 
 
 * Enables running of Docker images as a serverless proces
+* Point to the GCR repository for taking care of automatic deployment
 * Enables triggering of the process through [Cloud PubSub](https://cloud.google.com/pubsub)
 
 This looked ideal.  The trigger from PubSub required some minor modifications to the code, as the message posted is sent as a Base64 encoded content to the POST endpoint.  Our Deployment architecture of Step Executor looked like below. 
 
 
+![step executor arch](./images/migrationPlatform/step-executor-deployment-arch.svg)
 
 
+## Continuation
+
+We were able to post sample json request to the PubSub topic that we had created and was able to provision the resources successfully. 
+I'll continue how we implemented the "Orchestrator" as next part of my blog where the step executor also went through a few changes. 
 
 
 
