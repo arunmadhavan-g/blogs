@@ -254,6 +254,91 @@ The final execution consisted of
 * Executing `terraform apply -vars...` to actually provision the resources
 
 
+### Implementation 
+
+With the above steps defined, we did an implementation using NodeJs and Typescript, exposing a POST endpoint. It took the following input as request body
+
+```
+{
+	"traceId": "traceID from the requesting system", 
+	"stepName": "name of the terraform that needs to be executed", 
+	"auth": { "type": "service_account",
+	  "project_id": "<project id from GCP>",
+	  "private_key_id": "<keyId>",
+	  "private_key": "<Private Key>",
+	  "client_email": "<service email>",
+	  "client_id": "<GCP Client Id>",
+	  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+	  "token_uri": "https://oauth2.googleapis.com/token",
+	  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+	  "client_x509_cert_url": "<client-cert-url>"
+	},
+	"inputs": [{
+		"label":"input key as per terraform script",
+		"value": "value for the given label"
+	}, ...]
+}
+```
+
+Each of the inputs defined in the terraform script that we desire to execute are captures as a key-value pair defined by "label" and "value" in the `inputs` and are passed as part of the request. 
+
+
+
+To start with, we created a `script` folder inside the code base, which had all the terraform scripts, and the input stepName would have to match with the name of the terraform script that needs execution. As mentioned earlier, we implemented code using `childProcess`'s `exec` command to execute the various steps of terraform. At the end of every execution the outputs from `terraform.tfstate` file was read after which the temp folder would be deleted. 
+
+On successful completion of terraform and on reading the output a PUT call is made to the "Orchestrator service's" endpoint `<baseURL>/planstepstatuses/{traceId}` with the "label-value" format of output.
+
+### Packaging the code
+
+Terraform was executed as a command line script using `exec` as mentioned above. In any server it needs to run, it should have terraform pre-installed. We packaged the code as a docker image, with terraform as it's base image. This ensured that terraform is always installed and ready to be executed inside the docker container. 
+
+We installed node into the docker container and moved the code inside the same exposing the port 8000 for receiving calls from external systems. 
+Our docker file looked something like below. 
+
+```
+FROM hashicorp/terraform:light
+
+RUN apk add --update nodejs npm
+
+COPY ./scripts ./scripts
+COPY ./src ./src
+COPY package.json .
+COPY package-lock.json .
+COPY tsconfig.json .
+
+RUN npm install 
+
+EXPOSE 8000
+ENTRYPOINT [ "npm", "run", "start" ]
+```
+
+This helped us execute the scripts in a self sustained manner. 
+
+### Deploying and Running the Application
+
+Our initial thought was to make use of the [Google Kubernetes Engine(GKE)](https://cloud.google.com/kubernetes-engine) to run the docker image. Please note that this was part of the GCP hackathon and we were choosing components from Google's Cloud offering.  
+
+But we later realised that running a dedicated service would not make sense as the number of times the provisioning will be triggered would be relatively very low. Having a dedicated service for the same would have been costly. So we wanted to take a serveless approach, where we would be able to execute the Step Executor when ever needed. 
+
+The Step Executor is also expected to operate in an async fashion. As mentioned earlier, on completion of the step, it makes a call to the endpoint exposed by Orchestrator, which makes is a perfect candidate for async execution. 
+
+So we explored a way to execute the docker in a serverless fashion. That is when we came across [Google Run](https://cloud.google.com/run) which 
+
+* Enables running of Docker images as a serverless proces
+* Enables triggering of the process through [Cloud PubSub](https://cloud.google.com/pubsub)
+
+This looked ideal.  The trigger from PubSub required some minor modifications to the code, as the message posted is sent as a Base64 encoded content to the POST endpoint.  Our Deployment architecture of Step Executor looked like below. 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
