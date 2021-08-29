@@ -79,5 +79,182 @@ With the above information in hand, let's take a look into how we were able to p
 Step Executor was a service that exposed a single POST endpoint, to which we can pass a set of input and security information, based on which it would choose and run a terraform script. The endpoint would handle the request in an async fashion and will make a call back to a webhook endpoint exposed at the "Orchestrator Service" ( to be discussed later ) with the output from terraform. 
 
 
+### Terraform Rules
+To ensure uniformity across all the different scripts we wanted to set the following rules for terraform scripts
+
+1. Every script is used to create a single component
+2. Every script takes a set of input and exposes a set of output 
+3. All the terraform scripts would read credentials from a credentials file called `auth.json`
+4. The inputs are directly passed to the `terraform plan` or `terraform apply` commands
+5. The output of the `terraform apply` command is written into `terraform.tfstate` state file 
+
+Below is a sample terraform file that we used for creating a postgres DB in Cloud SQL along with an admin user
+
+```
+provider "google" {
+    credentials = file(var.credentials_file)
+    project = var.project
+}
+
+provider "google-beta" {
+    credentials = file(var.credentials_file)
+    project = var.project
+}
+
+variable "project" { 
+	default = ""
+}
+
+variable "credentials_file" {
+	default = "auth.json"
+}
+
+variable "region" {
+  default = "us-central1"
+}
+
+variable "zone" {
+  default = "us-central1-c"
+}
+
+# database instance settings
+variable db_version {
+  default = "POSTGRES_11"
+}
+
+variable db_tier {
+  default = "db-f1-micro"
+}
+
+variable db_activation_policy {
+  default = "ALWAYS"
+}
+
+variable db_disk_autoresize {
+  default = true
+}
+
+variable db_disk_size {
+  default = 10
+}
+
+variable db_disk_type {
+  default = "PD_SSD"
+}
+
+variable db_pricing_plan {
+  default = "PER_USE"
+}
+
+variable db_instance_access_cidr {
+  default = "0.0.0.0/0"
+}
+
+# database settings
+variable db_name {
+  description = "Name of the default database to create"
+  default = "default_db"
+}
+
+variable db_charset {
+  description = "The charset for the default database"
+  default = ""
+}
+
+variable db_collation {
+  description = "The collation for the default database. Example for MySQL databases: 'utf8_general_ci'"
+  default = ""
+}
+
+# user settings
+variable db_user_name {
+  description = "The name of the default user"
+  default = "admin"
+}
+
+variable db_user_host {
+  description = "The host for the default user"
+  default = "%"
+}
+
+variable db_user_password {
+  default = ""
+}
+
+output "connection_name" {
+  value       = google_sql_database_instance.postgresql.*.connection_name
+  description = "Postgress Connection Name"
+}
+
+resource "google_sql_database_instance" "postgresql" {
+  
+  provider = google
+
+  name = "postgresql"
+  project = var.project
+  region = var.region
+  database_version = "${var.db_version}"
+  
+  settings {
+    tier = "${var.db_tier}"
+    activation_policy = "${var.db_activation_policy}"
+    disk_autoresize = "${var.db_disk_autoresize}"
+    disk_size = "${var.db_disk_size}"
+    disk_type = "${var.db_disk_type}"
+    pricing_plan = "${var.db_pricing_plan}"
+    
+    location_preference {
+      zone = var.zone
+    }
+   
+    ip_configuration {
+      ipv4_enabled = "true"
+      authorized_networks {
+        value = "${var.db_instance_access_cidr}"
+      }
+    }
+  }
+}
+
+# create database
+resource "google_sql_database" "postgresql_db" {
+  provider = google-beta
+
+  name = "${var.db_name}"
+  project = "${var.project}"
+  instance = "${google_sql_database_instance.postgresql.name}"
+  charset = "${var.db_charset}"
+  collation = "${var.db_collation}"
+}
+
+# create user
+resource "random_id" "user_password" {
+  byte_length = 8
+}
+
+resource "google_sql_user" "postgresql_user" {
+
+  provider = google-beta
+
+  name = "${var.db_user_name}"
+  project  = "${var.project}"
+  instance = "${google_sql_database_instance.postgresql.name}"
+  host = "${var.db_user_host}"
+  password = "${var.db_user_password == "" ?
+  random_id.user_password.hex : var.db_user_password}"
+}
+```
+The final execution consisted of 
+
+* Creating a `temp` Folder
+* Moving the terraform file tat needs to be executed
+* Creating an `auth.json` based on the security information passed
+* Executing `terraform init` to iniaitlize all the plugins required for executing the script
+* Executing `terraform plan -vars...` for creating the execution plan
+* Executing `terraform apply -vars...` to actually provision the resources
+
+
+
+
 
 
