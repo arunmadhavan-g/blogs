@@ -333,7 +333,7 @@ So we explored a way to execute the docker in a serverless fashion. That is when
 This looked ideal.  The trigger from PubSub required some minor modifications to the code, as the message posted is sent as a Base64 encoded content to the POST endpoint.  Our Deployment architecture of Step Executor looked like below. 
 
 
-![step executor arch](./images/migrationPlatform/step-executor-deployment-arch.svg)
+![step executor arch](./images/migrationPlatform/step-executor-deployment-arch.jpg)
 
 
 ## Continuation
