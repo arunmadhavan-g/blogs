@@ -1,6 +1,3 @@
-# Building A Cloud Migration Platform - Part 1 : Provisioning the infrastructure
-
-
 A recent change in our Org, all the applications are required to be moved to GCP as part of a strategic decision. 
 Most of our apps run out of Azure today with a few services deployed in AWS as well, with tons of other apps running out of on-prem datacenters. 
 
