@@ -9,7 +9,8 @@ There has been lots of work done by different people across different teams to m
 the loss of information exchange is also quite common due to the shear size of the organization. Another major problem is lack of working knowledge in GCP, which is an org wide issue. 
 Not every one is aware of the best practices that needs to be followed as part of their provisioning of infrastructure, which components to choose etc. and there still exists a lot of learning curve to go through. 
 
-Recently as part of the GCP adoption initiative, we had a hackathon conducted and we pitted in with a solution to make things simple for teams to move to GCP. 
+Recently as part of the GCP adoption initiative, we had a hackathon conducted and we pitted in with a solution to make things simple for teams to move to GCP. This solution takes inspiration from one of the best products that I have worked on developing a few years back, which helped me architect this solution. 
+
 I'll share my thoughts on how we approached the problem statement as part of this blog series. As part of this blog, we will see how we approached the problem of provisioning the infrastructure components in GCP. 
 
 
@@ -286,7 +287,8 @@ Each of the inputs defined in the terraform script that we desire to execute are
 
 To start with, we created a `script` folder inside the code base, which had all the terraform scripts, and the input stepName would have to match with the name of the terraform script that needs execution. As mentioned earlier, we implemented code using `childProcess`'s `exec` command to execute the various steps of terraform. At the end of every execution the outputs from `terraform.tfstate` file was read after which the temp folder would be deleted. 
 
-On successful completion of terraform and on reading the output a PUT call is made to the "Orchestrator service's" endpoint `<baseURL>/planstepstatuses/{traceId}` with the "label-value" format of output.
+On successful completion of terraform and on reading the output a PUT call is made to the "Orchestrator service's" endpoint
+with the "label-value" format of output.
 
 ### Packaging the code
 
