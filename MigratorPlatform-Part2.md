@@ -54,7 +54,7 @@ A step input mapping was defined to tell from where the information would come f
 
 Finally the complete plan's output was captured which are basically outputs from individual steps. Our overall model looked like below. 
 
-> TODO : Add the modelling here
+![](./images/migrationPlatform/ExecutionPlan-ER.svg)
 
 
 ## Handling the inputs
