@@ -92,16 +92,21 @@ We hacked together a bunch of code to make all this work. Created a spring boot 
 
 But as we started splitting, refactoring and adding more scripts, we realised that human error is something that cannot be avoided and this is not going to scale. 
 
-
 To handle this, we decided to move the scripts to a google object store. The location of the script was captured as part of the step and was passed down to the "Step Executor" as input. The step executor's body changed as shown below. 
-
 
 We made the step executor to download the script from the object store everytime it executes, there by eliminating storing the scripts as part of the code base. The step executor is now a stateless component which worked based on the inputs that was passed to it.  The below sequence explains on how the overall execution happened. 
 
+![](./images/migrationPlatform/Sequence-Orchestrator-StepExecutor.svg)
 
 ## Continuation
 
-Orchestrator was able to capture the plan's information also handle the orchestration of individual component creation request. We did not develop any specific UI for the same and handled the values using migration scripts. In our next part, I'll talk about how we managed to provide user interaction using the mediator service. 
+Orchestrator was able to capture the plan's information also handle the orchestration of individual component creation request. We did not develop any specific UI for the same and handled the values using migration scripts. We bundled the application with docker and deployed it into an EKS cluster.
+
+![](./images/migrationPlatform/Deployment-Orchestrator.svg)
+
+
+
+In our next part, I'll talk about how we managed to provide user interaction using the mediator service. 
 
 
 
