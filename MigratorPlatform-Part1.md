@@ -336,7 +336,7 @@ This looked ideal.  The trigger from PubSub required some minor modifications to
 ## Continuation
 
 We were able to post sample json request to the PubSub topic that we had created and was able to provision the resources successfully. 
-I'll continue how we implemented the "Orchestrator" as next part of my blog where the step executor also went through a few changes. 
+I've written about how we implemented the "Orchestrator" as [part 2](https://techmusings.dev/buildingACloudMigrationPlatformPart2OrchestrationAndExecution) of my blog where the step executor also went through a few changes. 
 
 
 
