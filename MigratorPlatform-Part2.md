@@ -81,6 +81,8 @@ With the above changes, we were able to successfully capture the information req
 
 For this reason, we created what we call the "Value" tables, which would be used to capture the above mentioned information. All the information across these tables were linked together using a "traceId" which is passed from the caller's location ( Mediator ). The traceId is also passed down to the Step Executor, so that when it calls back the "Orchestrator" it would be able to tell for which step belonging to which traceId was executed. 
 
+![](./images/migrationPlatform/ValueTables.svg)
+
 Once all the steps in the Plan were executed, the Plan output values were populated and a call is made back to Mediator with the traceID and the output values of the Plan. 
 
 
@@ -95,9 +97,6 @@ To handle this, we decided to move the scripts to a google object store. The loc
 
 
 We made the step executor to download the script from the object store everytime it executes, there by eliminating storing the scripts as part of the code base. The step executor is now a stateless component which worked based on the inputs that was passed to it.  The below sequence explains on how the overall execution happened. 
-
-
-
 
 
 ## Continuation
