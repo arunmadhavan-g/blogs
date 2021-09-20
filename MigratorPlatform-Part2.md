@@ -40,7 +40,7 @@ I had mentioned that the overall design was inspited by a CI/CD pipeline where a
 Similarly we designed our system to have a root component called the "Execution Plan" or just a "Plan" for brievity. The plan consists of individual steps. Each step in this case are individual terraform executions ( executed by Step Executor ). A Plan will have user inputs, which as discussed earlier will have definition of all possible inputs required for creation of the component.  
 
 
-Similarly each step will have step inputs, which would be passed down to the Step executor for executing the terraform script. Interestingly the step's input can come from either the plan's input or from the output of each step. Thus the output from each of these steps were also defined. 
+Each step will inturn have step inputs, which would be passed down to the Step executor for executing the terraform script. Interestingly the step's input can come from either the plan's input or from the output of each step. Thus the output from each of these steps were also defined. 
 A step input mapping was defined to tell whether the step gets its input from user or a previous step's output. 
 
 
