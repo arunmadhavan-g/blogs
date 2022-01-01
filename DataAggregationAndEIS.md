@@ -1,7 +1,6 @@
 We helped build an *Enterprise Information Dashboard* that aggregated data across its tenants and helped them power a dashboard helping them with a unified data visibility.
 In this first part of the blog, where I talk about the path we took to move the data into the data lake. We'll look into how it was transformed and presented in the next part.   
 
-
 ## TL;DR
 
 Data that was spread across 120+ DB instances ( tenant specific sharding ) was pulled into AWS Redshift into *Staging Tables*.
@@ -11,7 +10,6 @@ We were able to achieve the same using AWS DMS, writing configurations using its
 
 Our client provides whitelabel solution of a financial product with over 120+ customers(tenants). They had their data sharded and isolated at a tenant level, with different DB instance per customer. 
 Depending on the functionality, they also had the data split across databases, viz. lookup DB, transaction DB, customer DB etc. On top of this, some customers were available across regions ( IN, SG, NA etc. ). For each of these regions, the tenants had a separate DB instance as well.
-
 
 The schema across these different DB instances were different in most cases. To address quickly changing customer needs, each tenant's tables could have more or less fields, or additional tables. 
 Standardization of data through **One Script** is not going to work in our case.  
@@ -108,14 +106,12 @@ It looks into the binary log of the database and throws events of every change t
 Every change is emitted as json that indicates the nature of operation ( Insert, update or delete ), along with timestamp, and before and after change states.
 These are published as events in a KAFKA topic which can then be consumed and used to push data into Redshift. Debezium has connectors for popular Databases as well which makes development effort to be close to nothing.
 
-
 ![Debezium Flow](./images/DataAggregatorAndEIS/debezium.svg)
 
 But Debezium came with a complex infra setup which included KAFKA, a service that keeps running the Debezium server and consumer, which requires additional monitoring in place. 
 We also had to think about the strategy to move the initial data to redshift and in case of long failures, a strategy to identify delta and load them. 
 
 The time to market and ease of maintenance was critical for us, and we started looking into other options.
-
 
 ## AWS DMS
 
@@ -151,23 +147,46 @@ This would mean that we will have to add *transformation rule* that would map ta
 
 Though there is a handy wizard that helps you to achieve the same, doing it repeatedly for individual tables of each DB, belonging to each functionality, tenant and region would become too tedious. 
 
-This is where we used the **JSON transformation rules** instead of the wizard. Our configurations were repeated in nature, and we wrote a small
-UI screen which asks for the Region, DB and functionality details along with list of tables, and generates a JSON that can be copied and pasted into the DMS console while creating the task. 
+This is where we used the **JSON transformation rules** instead of the wizard. We used a rule to rename the schema when on-boarding data. The sample JSON would looks like below. 
 
+```json
+{
+    "rules": [
+        {
+            "rule-type": "transformation",
+            "rule-id": "1",
+            "rule-name": "1",
+            "rule-action": "rename",
+            "rule-target": "schema",
+            "object-locator": {
+                "schema-name": "%",
+                "table-name": "<TABLE_NAME>"
+            },
+            "value": "<TARGET_SCHEMA>"
+        }
+    ]
+}
+```
+
+For every table belonging to a tenant, region and function a transformation rule was added to move it to it's corresponding schema.
+This way we were able to onboard each of the tenant's tables into separate schemas which was our staging schemas.
+
+We developed a UI screen as part of the bigger platform ( which will be discussed in the next part of the blog ), that would automatically generate this JSON configuration based on onboarded tenants. 
+This made on-boarding the tenant databases a simple task. 
 
 ## Data format
 
-With DMS working fine for us, we wanted to plan how we will import the data into Redshift. 
-
-As already mentioned earlier, we needed to import data from tenants, across regions and functionalities. 
+As mentioned earlier, we needed to import data from tenants, across regions and functionalities. 
 We created a schema per DB in redshift, and named the schema with a **TENANT_REGION_FUNCTION** format. This way data from each of the DB were created inside its own schema. 
 
-A task is created per schema in Redshift which brought the data from the source. The data pulled into each of these schemas were just an exact replica of what was in its production DB. 
-This means that the tables across these schemas may or may not be same. Since we separated it based on schemas the issue with different data formats were not a concern and DMS was able to do its job without any complications. 
+A task is created per datasource which brought the data into redshift.  
 
 ![Data format Mapping](./images/DataAggregatorAndEIS/data-format-mapping.svg)
 
 
+As next step, we had to pull data from each of these schemas and create them as Facts and Dimension tables to be used for data analysis ( Snowflake schema ).
+
 ## Next 
 
-In the next blog, I'll talk about how the different tables in different schemas were made into a common format and transformed into facts and dimensions. We'll also discuss the platform that was built to help the client onboard with ease.
+In the next blog, I'll talk about how the different tables in different schemas were made into a common format and transformed into facts and dimensions. 
+We'll also discuss the platform that was built to help the client onboard with ease.
